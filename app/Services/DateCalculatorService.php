@@ -9,6 +9,8 @@ class DateCalculatorService
 {
     public function calculate(Carbon $start, Carbon $end): array
     {
+        $diff = $start->diff($end);
+
         $totalDays = $start->diffInDays($end);
         $totalHours = $start->diffInHours($end);
         $totalMinutes = $start->diffInMinutes($end);
@@ -29,14 +31,14 @@ class DateCalculatorService
         }
 
         return [
-            'total_days' => $totalDays,
-            'weeks' => floor($totalDays / 7),
-            'remaining_days' => $totalDays % 7,
-            'months' => $start->diffInMonths($end),
-            'years' => $start->diffInYears($end),
-            'hours' => $totalHours,
-            'minutes' => $totalMinutes,
-            'seconds' => $totalSeconds,
+            'total_days' => (int) $totalDays,
+            'weeks' => (int) floor($totalDays / 7),
+            'remaining_days' => (int) ($totalDays % 7),
+            'months' => $diff->m + ($diff->y * 12),
+            'years' => $diff->y,
+            'hours' => (int) $totalHours,
+            'minutes' => (int) $totalMinutes,
+            'seconds' => (int) $totalSeconds,
             'weekdays' => $weekdays,
             'weekends' => $weekends,
             'start_date_formatted' => $start->format('d.m.Y'),
