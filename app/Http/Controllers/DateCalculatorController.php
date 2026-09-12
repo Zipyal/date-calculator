@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\DateCalculation;
+use App\Services\DateCalculatorService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 
 class DateCalculatorController extends Controller
 {
+    public function __construct(
+        private DateCalculatorService $calculator
+    ) {}
+
     public function index()
     {
         $recentCalculations = DateCalculation::latest()
             ->take(5)
             ->get();
-            
+
         return view('calculator.index', compact('recentCalculations'));
     }
 
@@ -32,10 +36,10 @@ class DateCalculatorController extends Controller
 
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = Carbon::parse($validated['end_date']);
-        
-        $calculation = $this->calculateDateDifference($startDate, $endDate);
-        
-        // Сохранении истории
+
+        // Одна строка вместо вызова приватного метода
+        $calculation = $this->calculator->calculate($startDate, $endDate);
+
         DateCalculation::create([
             'start_date' => $startDate,
             'end_date' => $endDate,
@@ -49,42 +53,5 @@ class DateCalculatorController extends Controller
 
         return view('calculator.index', compact('calculation', 'recentCalculations'))
             ->with('success', 'Расчет успешно выполнен!');
-    }
-
-    private function calculateDateDifference(Carbon $start, Carbon $end)
-    {
-        $totalDays = $start->diffInDays($end);
-        $totalHours = $start->diffInHours($end);
-        $totalMinutes = $start->diffInMinutes($end);
-        $totalSeconds = $start->diffInSeconds($end);
-        
-        // Период для подсчета рабочих дней
-        $period = CarbonPeriod::create($start, $end);
-        
-        $weekdays = 0;
-        $weekends = 0;
-        
-        foreach ($period as $date) {
-            if ($date->isWeekend()) {
-                $weekends++;
-            } else {
-                $weekdays++;
-            }
-        }
-        
-        return [
-            'total_days' => $totalDays,
-            'weeks' => floor($totalDays / 7),
-            'remaining_days' => $totalDays % 7,
-            'months' => $start->diffInMonths($end),
-            'years' => $start->diffInYears($end),
-            'hours' => $totalHours,
-            'minutes' => $totalMinutes,
-            'seconds' => $totalSeconds,
-            'weekdays' => $weekdays,
-            'weekends' => $weekends,
-            'start_date_formatted' => $start->format('d.m.Y'),
-            'end_date_formatted' => $end->format('d.m.Y'),
-        ];
     }
 }
