@@ -3,36 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор дат</title>
+    <title>Калькулятор дат - DateCalc</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6">Калькулятор дат</h1>
-        
-        <form action="{{ route('calculator.calculate') }}" method="POST" class="bg-white p-6 rounded-lg shadow">
-            @csrf
-            <div class="mb-4">
-                <label>Начальная дата</label>
-                <input type="date" name="start_date" class="border p-2 w-full" required>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-block bg-white rounded-full px-6 py-2 shadow-lg mb-4">
+                <i class="fas fa-calendar-alt text-purple-600 mr-2"></i>
+                <span class="font-semibold text-gray-800">DateCalc</span>
             </div>
-            <div class="mb-4">
-                <label>Конечная дата</label>
-                <input type="date" name="end_date" class="border p-2 w-full" required>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
+                Калькулятор дат
+            </h1>
+            <p class="text-purple-100 text-lg">
+                Узнайте точную разницу между двумя датами
+            </p>
+        </div>
+
+        <!-- Форма и результаты -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="glass-effect rounded-2xl shadow-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <i class="fas fa-calculator text-purple-600 mr-2"></i>
+    Введите даты
+</h2>
+
+@if(session('success'))
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+        <i class="fas fa-check-circle mr-2"></i>
+        {{ session('success') }}
+    </div>
+@endif
+
+<form action="{{ route('calculator.calculate') }}" method="POST" class="space-y-6">
+    @csrf
+    
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-play-circle text-purple-500 mr-1"></i>
+            Начальная дата
+        </label>
+        <input 
+            type="date" 
+            name="start_date" 
+            value="{{ old('start_date', date('Y-m-d')) }}"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('start_date') border-red-500 @enderror"
+        >
+        @error('start_date')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+    
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-flag-checkered text-purple-500 mr-1"></i>
+            Конечная дата
+        </label>
+        <input 
+            type="date" 
+            name="end_date" 
+            value="{{ old('end_date') }}"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('end_date') border-red-500 @enderror"
+        >
+        @error('end_date')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+    
+    <button 
+        type="submit"
+        class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-600 transition-all transform hover:scale-105"
+    >
+        <i class="fas fa-magic mr-2"></i>
+        Рассчитать разницу
+    </button>
+</form>
             </div>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
-                Рассчитать
-            </button>
-        </form>
-        
-        @if(isset($calculation))
-            <div class="mt-6 bg-white p-6 rounded-lg shadow">
-                <h2 class="text-xl font-bold mb-4">Результаты:</h2>
-                <p>Дней: {{ $calculation['total_days'] }}</p>
-                <p>Недель: {{ $calculation['weeks'] }}</p>
-                <p>Часов: {{ number_format($calculation['hours']) }}</p>
+            <div class="glass-effect rounded-2xl shadow-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
+    Результаты
+</h2>
+
+@if(isset($calculation))
+    <div class="space-y-4">
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 text-center">
+            <p class="text-sm text-gray-600">Период расчета</p>
+            <p class="text-lg font-bold text-gray-800">
+                {{ $calculation['start_date_formatted'] }} → {{ $calculation['end_date_formatted'] }}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="stat-card rounded-lg p-4 text-center card-hover">
+                <div class="text-3xl font-bold text-purple-600">{{ $calculation['total_days'] }}</div>
+                <div class="text-sm text-gray-600">Всего дней</div>
             </div>
-        @endif
+            <div class="stat-card rounded-lg p-4 text-center card-hover">
+                <div class="text-3xl font-bold text-blue-600">{{ $calculation['weeks'] }}</div>
+                <div class="text-sm text-gray-600">Недель</div>
+            </div>
+            <div class="stat-card rounded-lg p-4 text-center card-hover">
+                <div class="text-3xl font-bold text-green-600">{{ $calculation['months'] }}</div>
+                <div class="text-sm text-gray-600">Месяцев</div>
+            </div>
+            <div class="stat-card rounded-lg p-4 text-center card-hover">
+                <div class="text-3xl font-bold text-orange-600">{{ $calculation['years'] }}</div>
+                <div class="text-sm text-gray-600">Лет</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600"><i class="fas fa-clock text-purple-500 mr-2"></i>Часов:</span>
+                <span class="font-semibold">{{ number_format($calculation['hours']) }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600"><i class="fas fa-stopwatch text-blue-500 mr-2"></i>Минут:</span>
+                <span class="font-semibold">{{ number_format($calculation['minutes']) }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600"><i class="fas fa-hourglass text-green-500 mr-2"></i>Секунд:</span>
+                <span class="font-semibold">{{ number_format($calculation['seconds']) }}</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                <div class="text-2xl font-bold text-blue-600">{{ $calculation['weekdays'] }}</div>
+                <div class="text-sm text-gray-600">Рабочих дней</div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4 text-center">
+                <div class="text-2xl font-bold text-red-600">{{ $calculation['weekends'] }}</div>
+                <div class="text-sm text-gray-600">Выходных</div>
+            </div>
+        </div>
+    </div>
+@else
+    <div class="text-center py-12">
+        <i class="fas fa-calendar-plus text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg">Введите даты и нажмите "Рассчитать"</p>
+        <p class="text-gray-400 text-sm mt-2">Результаты появятся здесь</p>
+    </div>
+@endif
+            </div>
+        </div>
     </div>
 </body>
 </html>
