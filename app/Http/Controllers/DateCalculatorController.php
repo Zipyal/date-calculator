@@ -37,7 +37,6 @@ class DateCalculatorController extends Controller
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = Carbon::parse($validated['end_date']);
 
-        // Одна строка вместо вызова приватного метода
         $calculation = $this->calculator->calculate($startDate, $endDate);
 
         DateCalculation::create([
@@ -47,11 +46,13 @@ class DateCalculatorController extends Controller
             'user_ip' => $request->ip(),
         ]);
 
-        $recentCalculations = DateCalculation::latest()
-            ->take(5)
-            ->get();
+        $recentCalculations = DateCalculation::latest()->take(5)->get();
 
-        return view('calculator.index', compact('calculation', 'recentCalculations'))
-            ->with('success', 'Расчет успешно выполнен!');
+        return view('calculator.index', [
+            'calculation' => $calculation,
+            'recentCalculations' => $recentCalculations,
+            'selectedStartDate' => $validated['start_date'],
+            'selectedEndDate' => $validated['end_date'],
+        ])->with('success', 'Расчет успешно выполнен!');
     }
 }
