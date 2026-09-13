@@ -56,4 +56,15 @@ class DateCalculatorService
             'years' => $baseDate->copy()->addYears($amount),
         };
     }
+
+    // Режим 3: Отнять от даты
+    public function subtractFromDate(Carbon $baseDate, int $amount, string $unit): Carbon
+    {
+        return match ($unit) {
+            'days' => $baseDate->copy()->subDays($amount),
+            'weeks' => $baseDate->copy()->subWeeks($amount),
+            'months' => $baseDate->copy()->subMonths($amount),
+            'years' => $baseDate->copy()->subYears($amount),
+        };
+    }
 }
