@@ -185,6 +185,7 @@
                         Прибавить
                     </button>
                 </form>
+
                 <!-- ФОРМА 3: отнять от даты -->
                 <form id="form-subtract" action="{{ route('calculator.subtract') }}" method="POST"
                     class="space-y-6 {{ ($activeMode ?? 'between') === 'subtract' ? '' : 'hidden' }}">
@@ -382,11 +383,10 @@
                         <i class="fas fa-history text-purple-600 mr-2"></i>
                         Последние расчеты
                     </h3>
-                    <form action="{{ route('calculator.clearHistory') }}" method="POST"
-                        onsubmit="return confirm('Удалить всю историю?')">
+                    <form action="{{ route('calculator.clearHistory') }}" method="POST" id="clear-history-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit"
+                        <button type="button" onclick="openClearModal()"
                             class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors font-medium">
                             <i class="fas fa-trash mr-1"></i>
                             Очистить
@@ -411,6 +411,39 @@
         <!-- футер -->
         <div class="text-center mt-8 text-purple-200">
             <p>© {{ date('Y') }} DateCalc - Калькулятор дат на Laravel</p>
+        </div>
+    </div>
+
+    <!-- модалка подтверждения очистки истории -->
+    <div id="clear-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200">
+        <!-- затемнение фона -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeClearModal()"></div>
+
+        <!-- содержимое модалки -->
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+            <div class="text-center">
+                <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Очистить историю?
+                </h3>
+                <p class="text-gray-600 mb-6">
+                    Все записи будут удалены безвозвратно. Это действие нельзя отменить.
+                </p>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeClearModal()"
+                        class="flex-1 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                        Отмена
+                    </button>
+                    <button type="button" onclick="submitClearForm()"
+                        class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors">
+                        <i class="fas fa-trash mr-1"></i>
+                        Удалить
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -445,12 +478,10 @@
             const today = new Date();
             const formatDate = (date) => date.toISOString().split('T')[0];
 
-            // Определяем активную вкладку
             const activeTab = document.querySelector('[id^="tab-"].bg-white');
             const mode = activeTab ? activeTab.id.replace('tab-', '') : 'between';
 
             if (mode === 'between') {
-                // Режим "Между датами" — заполняем обе даты
                 const endDate = new Date(today);
 
                 switch (endType) {
@@ -472,7 +503,6 @@
                 document.querySelector('#form-between input[name="end_date"]').value = formatDate(endDate);
 
             } else {
-                // Режимы "Прибавить" / "Отнять" — заполняем base_date и amount/unit
                 const formId = mode === 'add' ? 'form-add' : 'form-subtract';
                 const form = document.getElementById(formId);
 
@@ -511,6 +541,19 @@
                     btn.innerHTML = originalHtml;
                 }, 1500);
             });
+        }
+
+        function openClearModal() {
+            const modal = document.getElementById('clear-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeClearModal() {
+            document.getElementById('clear-modal').classList.add('hidden');
+        }
+
+        function submitClearForm() {
+            document.getElementById('clear-history-form').submit();
         }
     </script>
 </body>
