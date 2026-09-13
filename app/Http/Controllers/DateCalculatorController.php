@@ -109,4 +109,14 @@ class DateCalculatorController extends Controller
             ],
         ])->with('success', 'Расчет успешно выполнен!');
     }
+
+        //Фукнция - очистка истории расчета
+    public function clearHistory()
+        {
+            DateCalculation::truncate();
+
+            return redirect()
+                ->route('calculator.index')
+                ->with('success', 'История очищена');
+        }
 }

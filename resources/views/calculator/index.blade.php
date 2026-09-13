@@ -319,27 +319,37 @@
             </div>
         </div>
 
-        <!-- история -->
-        @if(isset($recentCalculations) && $recentCalculations->count() > 0)
-            <div class="mt-8 glass-effect rounded-2xl shadow-2xl p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">
-                    <i class="fas fa-history text-purple-600 mr-2"></i>
-                    Последние расчеты
-                </h3>
-                <div class="space-y-2">
-                    @foreach($recentCalculations as $calc)
-                        <div class="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-2">
-                            <span class="text-gray-700">
-                                {{ $calc->start_date->format('d.m.Y') }} → {{ $calc->end_date->format('d.m.Y') }}
-                            </span>
-                            <span class="font-semibold text-purple-600">
-                                {{ $calc->days_difference }} дней
-                            </span>
-                        </div>
-                    @endforeach
+            <!-- история -->
+            @if(isset($recentCalculations) && $recentCalculations->count() > 0)
+                <div class="mt-8 glass-effect rounded-2xl shadow-2xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-history text-purple-600 mr-2"></i>
+                            Последние расчеты
+                        </h3>
+                        <form action="{{ route('calculator.clearHistory') }}" method="POST" onsubmit="return confirm('Удалить всю историю?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors font-medium">
+                                <i class="fas fa-trash mr-1"></i>
+                                Очистить
+                            </button>
+                        </form>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($recentCalculations as $calc)
+                            <div class="flex justify-between items-center bg-gray-50 rounded-lg px-4 py-2">
+                                <span class="text-gray-700">
+                                    {{ $calc->start_date->format('d.m.Y') }} → {{ $calc->end_date->format('d.m.Y') }}
+                                </span>
+                                <span class="font-semibold text-purple-600">
+                                    {{ $calc->days_difference }} дней
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
         <!-- футер -->
         <div class="text-center mt-8 text-purple-200">
