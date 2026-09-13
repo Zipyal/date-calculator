@@ -55,4 +55,58 @@ class DateCalculatorController extends Controller
             'selectedEndDate' => $validated['end_date'],
         ])->with('success', 'Расчет успешно выполнен!');
     }
+
+    public function addToDate(Request $request)
+    {
+        $validated = $request->validate([
+            'base_date' => 'required|date',
+            'amount' => 'required|integer|min:1|max:10000',
+            'unit' => 'required|in:days,weeks,months,years',
+        ], [
+            'base_date.required' => 'Укажите начальную дату',
+            'amount.required' => 'Введите число',
+            'amount.integer' => 'Число должно быть целым',
+            'amount.min' => 'Число должно быть больше 0',
+            'unit.required' => 'Выберите единицу измерения',
+        ]);
+
+        $baseDate = Carbon::parse($validated['base_date']);
+        $amount = (int) $validated['amount'];
+        $unit = $validated['unit'];
+
+        // Логика расчета — в сервисе
+        $resultDate = $this->calculator->addToDate($baseDate, $amount, $unit);
+
+        // Разницу считаем тем же методом calculate()
+        $calculation = $this->calculator->calculate($baseDate, $resultDate);
+
+        DateCalculation::create([
+            'start_date' => $baseDate,
+            'end_date' => $resultDate,
+            'days_difference' => $calculation['total_days'],
+            'user_ip' => $request->ip(),
+        ]);
+
+        $recentCalculations = DateCalculation::latest()->take(5)->get();
+
+        return view('calculator.index', [
+            'calculation' => $calculation,
+            'recentCalculations' => $recentCalculations,
+            'selectedStartDate' => $validated['base_date'],
+            'selectedEndDate' => $resultDate->format('Y-m-d'),
+            'activeMode' => 'add',
+            'addResult' => [
+                'base_date' => $baseDate->format('d.m.Y'),
+                'result_date' => $resultDate->format('d.m.Y'),
+                'amount' => $amount,
+                'unit' => $unit,
+                'unit_label' => match ($unit) {
+                    'days' => 'дней',
+                    'weeks' => 'недель',
+                    'months' => 'месяцев',
+                    'years' => 'лет',
+                },
+            ],
+        ])->with('success', 'Расчет успешно выполнен!');
+    }
 }

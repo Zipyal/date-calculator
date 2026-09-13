@@ -7,6 +7,7 @@ use Carbon\CarbonPeriod;
 
 class DateCalculatorService
 {
+    // Режим 1: расчет между датами
     public function calculate(Carbon $start, Carbon $end): array
     {
         $diff = $start->diff($end);
@@ -16,7 +17,6 @@ class DateCalculatorService
         $totalMinutes = $start->diffInMinutes($end);
         $totalSeconds = $start->diffInSeconds($end);
 
-        // Создаем период для подсчета рабочих дней
         $period = CarbonPeriod::create($start, $end);
 
         $weekdays = 0;
@@ -44,5 +44,16 @@ class DateCalculatorService
             'start_date_formatted' => $start->format('d.m.Y'),
             'end_date_formatted' => $end->format('d.m.Y'),
         ];
+    }
+
+    // Режим 2: прибавить к дате
+    public function addToDate(Carbon $baseDate, int $amount, string $unit): Carbon
+    {
+        return match ($unit) {
+            'days' => $baseDate->copy()->addDays($amount),
+            'weeks' => $baseDate->copy()->addWeeks($amount),
+            'months' => $baseDate->copy()->addMonths($amount),
+            'years' => $baseDate->copy()->addYears($amount),
+        };
     }
 }

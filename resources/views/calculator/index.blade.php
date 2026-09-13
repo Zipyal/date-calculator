@@ -72,7 +72,35 @@
                     </div>
                 @endif
 
-                <form action="{{ route('calculator.calculate') }}" method="POST" class="space-y-6">
+                <!-- переключатель режима -->
+                <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                    <button 
+                        type="button"
+                        onclick="switchMode('between')"
+                        id="tab-between"
+                        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-purple-700 shadow"
+                    >
+                        <i class="fas fa-exchange-alt mr-1"></i>
+                        Между датами
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="switchMode('add')"
+                        id="tab-add"
+                        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-800"
+                    >
+                        <i class="fas fa-plus mr-1"></i>
+                        Прибавить к дате
+                    </button>
+                </div>
+
+                <!-- ФОРМА 1: между датами -->
+                <form 
+                    id="form-between"
+                    action="{{ route('calculator.calculate') }}" 
+                    method="POST" 
+                    class="space-y-6 {{ ($activeMode ?? 'between') === 'between' ? '' : 'hidden' }}"
+                >
                     @csrf
                     
                     <div>
@@ -116,6 +144,80 @@
                     </button>
                 </form>
 
+                <!-- ФОРМА 2: прибавить к дате -->
+                <form 
+                    id="form-add"
+                    action="{{ route('calculator.add') }}" 
+                    method="POST" 
+                    class="space-y-6 {{ ($activeMode ?? 'between') === 'add' ? '' : 'hidden' }}"
+                >
+                    @csrf
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar-day text-purple-500 mr-1"></i>
+                            Начальная дата
+                        </label>
+                        <input 
+                            type="date" 
+                            name="base_date" 
+                            value="{{ old('base_date', $selectedStartDate ?? date('Y-m-d')) }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('base_date') border-red-500 @enderror"
+                        >
+                        @error('base_date')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-hashtag text-purple-500 mr-1"></i>
+                                Сколько
+                            </label>
+                            <input 
+                                type="number" 
+                                name="amount" 
+                                value="{{ old('amount', 30) }}"
+                                min="1"
+                                max="10000"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('amount') border-red-500 @enderror"
+                            >
+                            @error('amount')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-ruler text-purple-500 mr-1"></i>
+                                Единица
+                            </label>
+                            <select 
+                                name="unit"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('unit') border-red-500 @enderror"
+                            >
+                                <option value="days" {{ old('unit') === 'days' ? 'selected' : '' }}>Дней</option>
+                                <option value="weeks" {{ old('unit') === 'weeks' ? 'selected' : '' }}>Недель</option>
+                                <option value="months" {{ old('unit') === 'months' ? 'selected' : '' }}>Месяцев</option>
+                                <option value="years" {{ old('unit') === 'years' ? 'selected' : '' }}>Лет</option>
+                            </select>
+                            @error('unit')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <button 
+                        type="submit"
+                        class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-600 transition-all transform hover:scale-105"
+                    >
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Прибавить
+                    </button>
+                </form>
+
+                <!-- быстрые кнопки -->
                 <div class="mt-6 space-y-2">
                     <p class="text-sm text-gray-600 font-medium">Быстрый выбор:</p>
                     <div class="flex flex-wrap gap-2">
@@ -143,12 +245,24 @@
 
                 @if(isset($calculation))
                     <div class="space-y-4">
-                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 text-center">
-                            <p class="text-sm text-gray-600">Период расчета</p>
-                            <p class="text-lg font-bold text-gray-800">
-                                {{ $calculation['start_date_formatted'] }} → {{ $calculation['end_date_formatted'] }}
-                            </p>
-                        </div>
+                        @if(isset($addResult))
+                            <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-600">К дате</p>
+                                <p class="text-lg font-bold text-gray-800">
+                                    {{ $addResult['base_date'] }} + {{ $addResult['amount'] }} {{ $addResult['unit_label'] }}
+                                </p>
+                                <p class="text-2xl font-bold text-purple-700 mt-2">
+                                    = {{ $addResult['result_date'] }}
+                                </p>
+                            </div>
+                        @else
+                            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-600">Период расчета</p>
+                                <p class="text-lg font-bold text-gray-800">
+                                    {{ $calculation['start_date_formatted'] }} → {{ $calculation['end_date_formatted'] }}
+                                </p>
+                            </div>
+                        @endif
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="stat-card rounded-lg p-4 text-center card-hover">
@@ -234,6 +348,33 @@
     </div>
 
     <script>
+        function switchMode(mode) {
+            const tabBetween = document.getElementById('tab-between');
+            const tabAdd = document.getElementById('tab-add');
+            const formBetween = document.getElementById('form-between');
+            const formAdd = document.getElementById('form-add');
+
+            if (mode === 'between') {
+                formBetween.classList.remove('hidden');
+                formAdd.classList.add('hidden');
+
+                tabBetween.classList.add('bg-white', 'text-purple-700', 'shadow');
+                tabBetween.classList.remove('text-gray-600');
+
+                tabAdd.classList.remove('bg-white', 'text-purple-700', 'shadow');
+                tabAdd.classList.add('text-gray-600');
+            } else {
+                formAdd.classList.remove('hidden');
+                formBetween.classList.add('hidden');
+
+                tabAdd.classList.add('bg-white', 'text-purple-700', 'shadow');
+                tabAdd.classList.remove('text-gray-600');
+
+                tabBetween.classList.remove('bg-white', 'text-purple-700', 'shadow');
+                tabBetween.classList.add('text-gray-600');
+            }
+        }
+
         function setQuickDate(startType, endType) {
             const today = new Date();
             const formatDate = (date) => date.toISOString().split('T')[0];
