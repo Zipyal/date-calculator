@@ -445,25 +445,58 @@
             const today = new Date();
             const formatDate = (date) => date.toISOString().split('T')[0];
 
-            let endDate = new Date(today);
+            // Определяем активную вкладку
+            const activeTab = document.querySelector('[id^="tab-"].bg-white');
+            const mode = activeTab ? activeTab.id.replace('tab-', '') : 'between';
 
-            switch (endType) {
-                case 'tomorrow':
-                    endDate.setDate(endDate.getDate() + 1);
-                    break;
-                case 'week':
-                    endDate.setDate(endDate.getDate() + 7);
-                    break;
-                case 'month':
-                    endDate.setMonth(endDate.getMonth() + 1);
-                    break;
-                case 'year':
-                    endDate.setFullYear(endDate.getFullYear() + 1);
-                    break;
+            if (mode === 'between') {
+                // Режим "Между датами" — заполняем обе даты
+                const endDate = new Date(today);
+
+                switch (endType) {
+                    case 'tomorrow':
+                        endDate.setDate(endDate.getDate() + 1);
+                        break;
+                    case 'week':
+                        endDate.setDate(endDate.getDate() + 7);
+                        break;
+                    case 'month':
+                        endDate.setMonth(endDate.getMonth() + 1);
+                        break;
+                    case 'year':
+                        endDate.setFullYear(endDate.getFullYear() + 1);
+                        break;
+                }
+
+                document.querySelector('#form-between input[name="start_date"]').value = formatDate(today);
+                document.querySelector('#form-between input[name="end_date"]').value = formatDate(endDate);
+
+            } else {
+                // Режимы "Прибавить" / "Отнять" — заполняем base_date и amount/unit
+                const formId = mode === 'add' ? 'form-add' : 'form-subtract';
+                const form = document.getElementById(formId);
+
+                form.querySelector('input[name="base_date"]').value = formatDate(today);
+
+                switch (endType) {
+                    case 'tomorrow':
+                        form.querySelector('input[name="amount"]').value = 1;
+                        form.querySelector('select[name="unit"]').value = 'days';
+                        break;
+                    case 'week':
+                        form.querySelector('input[name="amount"]').value = 7;
+                        form.querySelector('select[name="unit"]').value = 'days';
+                        break;
+                    case 'month':
+                        form.querySelector('input[name="amount"]').value = 1;
+                        form.querySelector('select[name="unit"]').value = 'months';
+                        break;
+                    case 'year':
+                        form.querySelector('input[name="amount"]').value = 1;
+                        form.querySelector('select[name="unit"]').value = 'years';
+                        break;
+                }
             }
-
-            document.querySelector('input[name="start_date"]').value = formatDate(today);
-            document.querySelector('input[name="end_date"]').value = formatDate(endDate);
         }
 
         function copyResult() {
