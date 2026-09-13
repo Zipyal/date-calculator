@@ -266,12 +266,35 @@
             </div>
 
             <div class="glass-effect rounded-2xl shadow-2xl p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
-                    Результаты
-                </h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
+                        Результаты
+                    </h2>
+                    @if(isset($calculation))
+                        <button type="button" onclick="copyResult()" id="copy-btn"
+                            class="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors font-medium">
+                            <i class="fas fa-copy mr-1"></i>
+                            Скопировать
+                        </button>
+                    @endif
+                </div>
 
                 @if(isset($calculation))
+                    <!-- скрытый текст для копирования -->
+                    <div id="copy-text" class="hidden">
+                        Результат: {{ $calculation['start_date_formatted'] }} → {{ $calculation['end_date_formatted'] }}
+                        Всего дней: {{ $calculation['total_days'] }}
+                        Недель: {{ $calculation['weeks'] }}
+                        Месяцев: {{ $calculation['months'] }}
+                        Лет: {{ $calculation['years'] }}
+                        Часов: {{ $calculation['hours'] }}
+                        Минут: {{ $calculation['minutes'] }}
+                        Секунд: {{ $calculation['seconds'] }}
+                        Рабочих дней: {{ $calculation['weekdays'] }}
+                        Выходных: {{ $calculation['weekends'] }}
+                    </div>
+
                     <div class="space-y-4">
                         @if(isset($addResult))
                             <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 text-center">
@@ -441,6 +464,20 @@
 
             document.querySelector('input[name="start_date"]').value = formatDate(today);
             document.querySelector('input[name="end_date"]').value = formatDate(endDate);
+        }
+
+        function copyResult() {
+            const text = document.getElementById('copy-text').innerText;
+            const btn = document.getElementById('copy-btn');
+
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i>Скопировано';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 1500);
+            });
         }
     </script>
 </body>
