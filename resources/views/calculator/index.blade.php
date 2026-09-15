@@ -66,7 +66,7 @@
                     <i class="fas fa-calculator text-purple-600 mr-2"></i>
                     Введите даты
                 </h2>
-                
+
                 <!-- Виджет: сколько осталось -->
                 @if(isset($remaining))
                     <div class="grid grid-cols-3 gap-2 mb-6">
@@ -108,6 +108,11 @@
                         class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-800">
                         <i class="fas fa-minus mr-1"></i>
                         Отнять
+                    </button>
+                    <button type="button" onclick="switchMode('time')" id="tab-time"
+                        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-800 whitespace-nowrap">
+                        <i class="fas fa-clock mr-1"></i>
+                        Времена
                     </button>
                 </div>
 
@@ -260,6 +265,42 @@
                     </button>
                 </form>
 
+                <!-- ФОРМА 4: разница между временами -->
+                <form id="form-time" action="{{ route('calculator.time') }}" method="POST"
+                    class="space-y-6 {{ ($activeMode ?? 'between') === 'time' ? '' : 'hidden' }}">
+                    @csrf
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-clock text-purple-500 mr-1"></i>
+                            Начальное время
+                        </label>
+                        <input type="time" name="start_time" value="{{ old('start_time', '14:30') }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('start_time') border-red-500 @enderror">
+                        @error('start_time')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-clock text-purple-500 mr-1"></i>
+                            Конечное время
+                        </label>
+                        <input type="time" name="end_time" value="{{ old('end_time', '19:45') }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors @error('end_time') border-red-500 @enderror">
+                        @error('end_time')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-600 transition-all transform hover:scale-105">
+                        <i class="fas fa-clock mr-2"></i>
+                        Рассчитать разницу
+                    </button>
+                </form>
+
                 <!-- быстрые кнопки -->
                 <div class="mt-6 space-y-2">
                     <p class="text-sm text-gray-600 font-medium">Быстрый выбор:</p>
@@ -298,6 +339,34 @@
                         </button>
                     @endif
                 </div>
+
+
+                @if(isset($timeResult))
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-600">Период</p>
+                            <p class="text-lg font-bold text-gray-800">
+                                {{ $timeResult['start_time'] }} → {{ $timeResult['end_time'] }}
+                            </p>
+                        </div>
+
+                        <div class="stat-card rounded-lg p-6 text-center card-hover">
+                            <div class="text-4xl font-bold text-purple-600">{{ $timeResult['formatted'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Разница</div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Минут:</span>
+                                <span class="font-semibold">{{ number_format($timeResult['total_minutes']) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Секунд:</span>
+                                <span class="font-semibold">{{ number_format($timeResult['total_seconds']) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 @if(isset($calculation))
                     <!-- скрытый текст для копирования -->
@@ -383,7 +452,7 @@
                             </div>
                         </div>
                     </div>
-                @else
+                @elseif(!isset($timeResult))
                     <div class="text-center py-12">
                         <i class="fas fa-calendar-plus text-6xl text-gray-300 mb-4"></i>
                         <p class="text-gray-500 text-lg">Введите даты и нажмите "Рассчитать"</p>
@@ -471,12 +540,14 @@
                 between: document.getElementById('tab-between'),
                 add: document.getElementById('tab-add'),
                 subtract: document.getElementById('tab-subtract'),
+                time: document.getElementById('tab-time'),
             };
 
             const forms = {
                 between: document.getElementById('form-between'),
                 add: document.getElementById('form-add'),
                 subtract: document.getElementById('form-subtract'),
+                time: document.getElementById('form-time'),
             };
 
             for (const key in tabs) {

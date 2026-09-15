@@ -114,6 +114,37 @@ class DateCalculatorController extends Controller
         ])->with('success', 'Расчет успешно выполнен!');
     }
 
+    // Функция - разница между двумя временами(14 00 и 19 00 часов)
+    public function calculateTime(Request $request)
+    {
+        $validated = $request->validate([
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
+        ], [
+            'start_time.required' => 'Укажите начальное время',
+            'end_time.required' => 'Укажите конечное время',
+            'start_time.date_format' => 'Неверный формат времени',
+            'end_time.date_format' => 'Неверный формат времени',
+        ]);
+
+        $timeResult = $this->calculator->calculateTime(
+            $validated['start_time'],
+            $validated['end_time']
+        );
+
+        $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $remaining = $this->calculator->getRemaining();
+
+        return view('calculator.index', [
+            'timeResult' => $timeResult,
+            'recentCalculations' => $recentCalculations,
+            'remaining' => $remaining,
+            'activeMode' => 'time',
+        ])->with('success', 'Расчет успешно выполнен!');
+    }
+
+
+
     // Функция - очистка истории расчета
     public function clearHistory()
     {

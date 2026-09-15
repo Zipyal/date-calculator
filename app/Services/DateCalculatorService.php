@@ -78,4 +78,31 @@ class DateCalculatorService
             'days_left_in_week' => (int) $now->diffInDays($now->copy()->endOfWeek()),
         ];
     }
+
+    public function calculateTime(string $startTime, string $endTime): array
+    {
+        $start = Carbon::createFromFormat('H:i', $startTime);
+        $end = Carbon::createFromFormat('H:i', $endTime);
+
+        // Если конечное время меньше начального — считаем, что перешли через полночь
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        $totalMinutes = (int) $start->diffInMinutes($end);
+        $totalSeconds = (int) $start->diffInSeconds($end);
+
+        $hours = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+
+        return [
+            'start_time' => $start->format('H:i'),
+            'end_time' => $end->format('H:i'),
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'total_minutes' => $totalMinutes,
+            'total_seconds' => $totalSeconds,
+            'formatted' => $hours . ' ч ' . $minutes . ' мин',
+        ];
+    }
 }

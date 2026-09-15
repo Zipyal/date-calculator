@@ -8,3 +8,4 @@ Route::post('/calculate', [DateCalculatorController::class, 'calculate'])->name(
 Route::post('/add-to-date', [DateCalculatorController::class, 'addToDate'])->name('calculator.add');
 Route::delete('/history', [DateCalculatorController::class, 'clearHistory'])->name('calculator.clearHistory');
 Route::post('/subtract-from-date', [DateCalculatorController::class, 'subtractFromDate'])->name('calculator.subtract');
+Route::post('/calculate-time', [DateCalculatorController::class, 'calculateTime'])->name('calculator.time');
