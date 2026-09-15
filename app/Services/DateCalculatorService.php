@@ -67,4 +67,15 @@ class DateCalculatorService
             'years' => $baseDate->copy()->subYears($amount),
         };
     }
+
+    public function getRemaining(): array
+    {
+        $now = Carbon::now();
+
+        return [
+            'days_left_in_year' => (int) $now->diffInDays($now->copy()->endOfYear()),
+            'days_left_in_month' => (int) $now->diffInDays($now->copy()->endOfMonth()),
+            'days_left_in_week' => (int) $now->diffInDays($now->copy()->endOfWeek()),
+        ];
+    }
 }

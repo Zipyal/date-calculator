@@ -66,6 +66,24 @@
                     <i class="fas fa-calculator text-purple-600 mr-2"></i>
                     Введите даты
                 </h2>
+                
+                <!-- Виджет: сколько осталось -->
+                @if(isset($remaining))
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ $remaining['days_left_in_year'] }}</div>
+                            <div class="text-xs text-gray-600 mt-1">до конца года</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ $remaining['days_left_in_month'] }}</div>
+                            <div class="text-xs text-gray-600 mt-1">до конца месяца</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-orange-600">{{ $remaining['days_left_in_week'] }}</div>
+                            <div class="text-xs text-gray-600 mt-1">до конца недели</div>
+                        </div>
+                    </div>
+                @endif
 
                 @if(session('success'))
                     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">

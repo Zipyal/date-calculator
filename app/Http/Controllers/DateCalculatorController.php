@@ -11,15 +11,15 @@ class DateCalculatorController extends Controller
 {
     public function __construct(
         private DateCalculatorService $calculator
-    ) {}
+    ) {
+    }
 
     public function index()
     {
-        $recentCalculations = DateCalculation::latest()
-            ->take(5)
-            ->get();
+        $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $remaining = $this->calculator->getRemaining();
 
-        return view('calculator.index', compact('recentCalculations'));
+        return view('calculator.index', compact('recentCalculations', 'remaining'));
     }
 
     public function calculate(Request $request)
@@ -47,12 +47,14 @@ class DateCalculatorController extends Controller
         ]);
 
         $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $remaining = $this->calculator->getRemaining();
 
         return view('calculator.index', [
             'calculation' => $calculation,
             'recentCalculations' => $recentCalculations,
             'selectedStartDate' => $validated['start_date'],
             'selectedEndDate' => $validated['end_date'],
+            'remaining' => $remaining,
         ])->with('success', 'Расчет успешно выполнен!');
     }
 
@@ -88,6 +90,7 @@ class DateCalculatorController extends Controller
         ]);
 
         $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $remaining = $this->calculator->getRemaining();
 
         return view('calculator.index', [
             'calculation' => $calculation,
@@ -95,6 +98,7 @@ class DateCalculatorController extends Controller
             'selectedStartDate' => $validated['base_date'],
             'selectedEndDate' => $resultDate->format('Y-m-d'),
             'activeMode' => 'add',
+            'remaining' => $remaining,
             'addResult' => [
                 'base_date' => $baseDate->format('d.m.Y'),
                 'result_date' => $resultDate->format('d.m.Y'),
@@ -110,67 +114,68 @@ class DateCalculatorController extends Controller
         ])->with('success', 'Расчет успешно выполнен!');
     }
 
-        //Фукнция - очистка истории расчета
+    // Функция - очистка истории расчета
     public function clearHistory()
-        {
-            DateCalculation::truncate();
+    {
+        DateCalculation::truncate();
 
-            return redirect()
-                ->route('calculator.index')
-                ->with('success', 'История очищена');
-        }
+        return redirect()
+            ->route('calculator.index')
+            ->with('success', 'История очищена');
+    }
 
-
-        //Функция - отнять от даты
+    // Функция - отнять от даты
     public function subtractFromDate(Request $request)
-        {
-            $validated = $request->validate([
-                'base_date' => 'required|date',
-                'amount' => 'required|integer|min:1|max:10000',
-                'unit' => 'required|in:days,weeks,months,years',
-            ], [
-                'base_date.required' => 'Укажите начальную дату',
-                'amount.required' => 'Введите число',
-                'amount.integer' => 'Число должно быть целым',
-                'amount.min' => 'Число должно быть больше 0',
-                'unit.required' => 'Выберите единицу измерения',
-            ]);
+    {
+        $validated = $request->validate([
+            'base_date' => 'required|date',
+            'amount' => 'required|integer|min:1|max:10000',
+            'unit' => 'required|in:days,weeks,months,years',
+        ], [
+            'base_date.required' => 'Укажите начальную дату',
+            'amount.required' => 'Введите число',
+            'amount.integer' => 'Число должно быть целым',
+            'amount.min' => 'Число должно быть больше 0',
+            'unit.required' => 'Выберите единицу измерения',
+        ]);
 
-            $baseDate = Carbon::parse($validated['base_date']);
-            $amount = (int) $validated['amount'];
-            $unit = $validated['unit'];
+        $baseDate = Carbon::parse($validated['base_date']);
+        $amount = (int) $validated['amount'];
+        $unit = $validated['unit'];
 
-            $resultDate = $this->calculator->subtractFromDate($baseDate, $amount, $unit);
+        $resultDate = $this->calculator->subtractFromDate($baseDate, $amount, $unit);
 
-            $calculation = $this->calculator->calculate($resultDate, $baseDate);
+        $calculation = $this->calculator->calculate($resultDate, $baseDate);
 
-            DateCalculation::create([
-                'start_date' => $resultDate,
-                'end_date' => $baseDate,
-                'days_difference' => $calculation['total_days'],
-                'user_ip' => $request->ip(),
-            ]);
+        DateCalculation::create([
+            'start_date' => $resultDate,
+            'end_date' => $baseDate,
+            'days_difference' => $calculation['total_days'],
+            'user_ip' => $request->ip(),
+        ]);
 
-            $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $recentCalculations = DateCalculation::latest()->take(5)->get();
+        $remaining = $this->calculator->getRemaining();
 
-            return view('calculator.index', [
-                'calculation' => $calculation,
-                'recentCalculations' => $recentCalculations,
-                'selectedStartDate' => $validated['base_date'],
-                'selectedEndDate' => $resultDate->format('Y-m-d'),
-                'activeMode' => 'subtract',
-                'addResult' => [
-                    'base_date' => $baseDate->format('d.m.Y'),
-                    'result_date' => $resultDate->format('d.m.Y'),
-                    'amount' => $amount,
-                    'unit' => $unit,
-                    'unit_label' => match ($unit) {
-                        'days' => 'дней',
-                        'weeks' => 'недель',
-                        'months' => 'месяцев',
-                        'years' => 'лет',
-                    },
-                ],
-            ])->with('success', 'Расчет успешно выполнен!');
-        }
+        return view('calculator.index', [
+            'calculation' => $calculation,
+            'recentCalculations' => $recentCalculations,
+            'selectedStartDate' => $validated['base_date'],
+            'selectedEndDate' => $resultDate->format('Y-m-d'),
+            'activeMode' => 'subtract',
+            'remaining' => $remaining,
+            'addResult' => [
+                'base_date' => $baseDate->format('d.m.Y'),
+                'result_date' => $resultDate->format('d.m.Y'),
+                'amount' => $amount,
+                'unit' => $unit,
+                'unit_label' => match ($unit) {
+                    'days' => 'дней',
+                    'weeks' => 'недель',
+                    'months' => 'месяцев',
+                    'years' => 'лет',
+                },
+            ],
+        ])->with('success', 'Расчет успешно выполнен!');
+    }
 }
