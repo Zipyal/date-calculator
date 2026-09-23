@@ -48,6 +48,8 @@ class DateCalculatorController extends Controller
 
         $recentCalculations = DateCalculation::latest()->take(5)->get();
         $remaining = $this->calculator->getRemaining();
+        $dateInfo = $this->calculator->getDateInfo($endDate);
+
 
         return view('calculator.index', [
             'calculation' => $calculation,
@@ -55,6 +57,7 @@ class DateCalculatorController extends Controller
             'selectedStartDate' => $validated['start_date'],
             'selectedEndDate' => $validated['end_date'],
             'remaining' => $remaining,
+            'dateInfo' => $dateInfo,
         ])->with('success', 'Расчет успешно выполнен!');
     }
 
@@ -79,7 +82,7 @@ class DateCalculatorController extends Controller
         // Логика расчета — в сервисе
         $resultDate = $this->calculator->addToDate($baseDate, $amount, $unit);
 
-        // Разницу считаем тем же методом calculate()
+        // Метод calculate()
         $calculation = $this->calculator->calculate($baseDate, $resultDate);
 
         DateCalculation::create([
@@ -91,6 +94,7 @@ class DateCalculatorController extends Controller
 
         $recentCalculations = DateCalculation::latest()->take(5)->get();
         $remaining = $this->calculator->getRemaining();
+
 
         return view('calculator.index', [
             'calculation' => $calculation,

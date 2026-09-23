@@ -451,6 +451,39 @@
                                 <div class="text-sm text-gray-600">Выходных</div>
                             </div>
                         </div>
+
+                        {{-- Блок ISO-неделей и кварталом --}}
+
+                        @if(isset($dateInfo))
+                            <div class="bg-indigo-50 rounded-lg p-4">
+                                <p class="text-sm font-semibold text-gray-700 mb-3">
+                                    <i class="fas fa-info-circle text-indigo-500 mr-1"></i>
+                                    О конечной дате
+                                </p>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">ISO-неделя:</span>
+                                        <span class="font-semibold">{{ $dateInfo['iso_week'] }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Квартал:</span>
+                                        <span class="font-semibold">Q{{ $dateInfo['quarter'] }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">День в году:</span>
+                                        <span class="font-semibold">{{ $dateInfo['day_of_year'] }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Високосный:</span>
+                                        <span class="font-semibold">{{ $dateInfo['is_leap_year'] ? 'Да' : 'Нет' }}</span>
+                                    </div>
+                                    <div class="flex justify-between col-span-2">
+                                        <span class="text-gray-600">День недели:</span>
+                                        <span class="font-semibold">{{ $dateInfo['day_of_week'] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @elseif(!isset($timeResult))
                     <div class="text-center py-12">

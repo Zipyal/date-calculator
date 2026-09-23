@@ -105,4 +105,25 @@ class DateCalculatorService
             'formatted' => $hours . ' ч ' . $minutes . ' мин',
         ];
     }
+
+    public function getDateInfo(Carbon $date): array
+    {
+        return [
+            'iso_week' => (int) $date->isoWeek(),
+            'iso_year' => (int) $date->isoWeekYear(),
+            'quarter' => (int) ceil($date->month / 3),
+            'year' => (int) $date->year,
+            'day_of_year' => (int) $date->dayOfYear,
+            'is_leap_year' => $date->isLeapYear(),
+            'day_of_week' => match ($date->dayOfWeekIso) {
+                1 => 'Понедельник',
+                2 => 'Вторник',
+                3 => 'Среда',
+                4 => 'Четверг',
+                5 => 'Пятница',
+                6 => 'Суббота',
+                7 => 'Воскресенье',
+            },
+        ];
+    }
 }
