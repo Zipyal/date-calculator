@@ -49,6 +49,7 @@ class DateCalculatorController extends Controller
         $recentCalculations = DateCalculation::latest()->take(5)->get();
         $remaining = $this->calculator->getRemaining();
         $dateInfo = $this->calculator->getDateInfo($endDate);
+        $humanDiff = $this->calculator->getHumanDiff($startDate, $endDate);
 
 
         return view('calculator.index', [
@@ -58,6 +59,7 @@ class DateCalculatorController extends Controller
             'selectedEndDate' => $validated['end_date'],
             'remaining' => $remaining,
             'dateInfo' => $dateInfo,
+            'humanDiff' => $humanDiff,
         ])->with('success', 'Расчет успешно выполнен!');
     }
 

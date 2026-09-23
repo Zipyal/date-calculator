@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 
 class DateCalculatorService
@@ -106,6 +107,8 @@ class DateCalculatorService
         ];
     }
 
+
+    //ISO функция 
     public function getDateInfo(Carbon $date): array
     {
         return [
@@ -125,5 +128,16 @@ class DateCalculatorService
                 7 => 'Воскресенье',
             },
         ];
+    }
+
+
+    //Функция 'простым языком'
+    public function getHumanDiff(Carbon $start, Carbon $end): string
+    {
+        return $start->diffForHumans($end, [
+            'parts' => 2,
+            'join' => true,
+            'syntax' => CarbonInterface::DIFF_ABSOLUTE,
+        ]);
     }
 }

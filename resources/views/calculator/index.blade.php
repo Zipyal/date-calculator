@@ -404,6 +404,12 @@
                                     {{ $calculation['start_date_formatted'] }} → {{ $calculation['end_date_formatted'] }}
                                 </p>
                             </div>
+                            @if(isset($humanDiff))
+                                <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-3 text-center">
+                                    <p class="text-sm text-gray-600">Это примерно</p>
+                                    <p class="text-xl font-bold text-purple-700">{{ $humanDiff }}</p>
+                                </div>
+                            @endif
                         @endif
 
                         <div class="grid grid-cols-2 gap-4">
